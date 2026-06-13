@@ -9,6 +9,9 @@ from src.db import DatabaseManager
 logging.basicConfig(level=logging.INFO, format="%(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
+import argparse
+from src.downloader import INEDownloader
+
 def run_pipeline(
     db_path: str,
     studies_path: str,
@@ -56,15 +59,23 @@ def run_pipeline(
     logger.info(f"Pipeline complete! {saved_count} tract results saved to {db_path}.")
 
 if __name__ == "__main__":
-    # Define paths relative to the project root
-    DB_PATH = "data/malaga_census.db"
-    STUDIES = "data/studies_malaga.csv"
-    ACTIVITY = "data/activity_malaga.csv"
-    OCCUPATION = "data/occupation_malaga.csv"
+    parser = argparse.ArgumentParser(description="Run the MEDEA pipeline for a specific province.")
+    parser.add_argument("province_code", type=str, help="2-digit province code (e.g., '04' for Almería)")
+    args = parser.parse_args()
+    
+    prov = args.province_code.zfill(2)
+    
+    # 1. Download CSV files for the specified province
+    logger.info(f"Downloading data for province {prov}...")
+    downloader = INEDownloader(province_code=prov)
+    downloaded_paths = downloader.download_all()
+
+    # 2. Define dynamic paths based on the province code
+    DB_PATH = f"data/medea_census_{prov}.db"
     
     run_pipeline(
         db_path=DB_PATH,
-        studies_path=STUDIES,
-        activity_path=ACTIVITY,
-        occupation_path=OCCUPATION
+        studies_path=downloaded_paths.get("studies"),
+        activity_path=downloaded_paths.get("activity"),
+        occupation_path=downloaded_paths.get("occupation")
     )
