@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Databases
+data/
+*.db
+*.sqlite3
+
+# Poetry
+.poetry/
+poetry.lock
+
+# IDEs
+.vscode/
+.idea/
