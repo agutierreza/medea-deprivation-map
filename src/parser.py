@@ -25,8 +25,9 @@ class LocalDataParser:
         # Strip BOM from columns if present
         df.columns = df.columns.str.replace(r'^\ufeff', '', regex=True)
         
-        # Clean and convert the Total column to integer
-        df["Total_int"] = df["Total"].fillna("0").str.replace(".", "", regex=False).astype(int)
+        # Clean and convert the Total column to integer. Lone '.' represents missing/confidential cells and is replaced with '0'.
+        total_clean = df["Total"].fillna("0").str.strip().replace(".", "0", regex=False)
+        df["Total_int"] = total_clean.str.replace(".", "", regex=False).astype(int)
         
         # Filter to only keep rows representing census tracts (Secciones that start with 10 digits)
         # We also need Periodo = 2021 and Sexo = "Total".
